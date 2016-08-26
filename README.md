@@ -1,6 +1,6 @@
 ## Template
 
-支持web客户端和NodeJs服务端的javascript模板引擎
+javascript模板引擎
 
 #### 基础指令说明
 
@@ -63,6 +63,3 @@ web端:
         };
     </script>
     
-Nodejs
-    
-    developing ...

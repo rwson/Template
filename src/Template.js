@@ -26,9 +26,6 @@
 
 })(function(undefined) {
 
-    //  是否为nodeJs环境
-    var _isNode = _typeOf(window) === _typeOf(undefined) && global;
-
     //  缓存
     var _cache = {};
 
