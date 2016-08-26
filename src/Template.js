@@ -9,14 +9,19 @@
 
 (function(factory) {
 
+    //  require
     if (typeof define === "function" && define.amd) {
         define([], function() {
-            return factory(root);
+            return factory();
         });
-    } else(typeof(module) !== "undefined" && module.exports) {
-        module.exports = factory(root);
+
+        //  NodeJs
+    } else if (typeof module !== typeof undefined && module.exports) {
+        module.exports = factory();
     } else {
-        window.Template = factory(root);
+
+        //  script tag
+        window.Template = factory();
     }
 
 })(function(undefined) {
@@ -24,63 +29,107 @@
     //  是否为nodeJs环境
     var _isNode = _typeOf(window) === _typeOf(undefined) && global;
 
-    //  缓存之前编译过的模板
+    //  缓存
     var _cache = {};
 
-    //  HTML特殊字符转义
-    var _escapehtml = {
+    //  取值表达式正则
+    var _valueReg = /<%=(\s\S+?)%>/;
+
+    //  js可执行语句正则
+    var _evaluateReg = /<%(\s\S+?)%>/;
+
+    //  HTML特殊字符
+    var _htmlReg = /<|>|&/g;
+
+    //  特殊转义正则
+    var _escapeReg = /<$(\s\S+?)$>/;
+
+    //  特殊字符
+    var _charReg = /\\|'|\r|\n|\t|\u2028|\u2029/g;
+
+    //  最终的匹配语句
+    var _matcher = /<%=([\s\S]+?)%>|<%([\s\S]+?)%>|<\$([\s\S]+?)\$>|$/g;
+
+    //  HTML转义
+    var _escapeHtml = {
 
         "escapehash": {
             "<": "&lt;",
             ">": "&gt;",
-            "&": "&amp;",
-            '"': "&quot;",
-            "'": "&#x27;",
-            "/": "&#x2f;"
+            "&": "&amp;"
         },
 
-        "escaping": function(str) {
-            return _typeOf(str) !== 'String' ? str : str.replace(/[&<>"']/igm, function(str) {
-                return _escapehtml.escapehash[k];      
-            });
-        },
-
-        "detection": function(data) {
-            return _typeOf(data) === "Undefined" ? '' : data;
+        "escaping": function(char) {
+            return _escapeHtml.escapehash[char];
         }
-
     };
 
-    var _templateCfgs = {
-        "openTag": "{{",
-        "closeTag": "}}"
+    //  匹配特殊字符
+    var _escapeCharater = {
+
+        "escapehash": {
+            '"': "&quot;",
+            "'": "&#x27;",
+            "/": "&#x2f;",
+            "\\": "\\\\",
+            "\r": "",
+            "\n": "",
+            "\t": "",
+            "\u2028": "\\u2028",
+            "\u2029": "\\u2029"
+        },
+
+        "escaping": function(char) {
+            return _escapeCharater.escapehash[char];
+        }
     };
 
     var Template = {
 
-        "config": function(cfg) {
-            if(_typeOf(cfg) === "Object") {
-                for(var i in cfg) {
-                    _templateCfgs[i] = cfg[i];
-                }
+        compile: function(str) {
+            var fnBody = "";
+            var index = 0;
+            if (!_cache[str]) {
+                fnBody = "'use strict';var _temp = '';_temp += '";
+                str.replace(_matcher, function(match, value, evaluate, escapeStr, offset) {
+                    fnBody += str.slice(index, offset).replace(_charReg, _escapeCharater.escaping);
+
+                    //  可执行语句
+                    if (evaluate) {
+                        fnBody += "';" + evaluate + "_temp += '";
+                    }
+
+                    //  <%= xxx[.yyy] %> -> 普通的取值表达式
+                    if (value) {
+                        fnBody += "' + " + value + " + '";
+                    }
+
+                    //  <$ xxx $> -> HTML特殊字符转义
+                    if (escapeStr) {
+                        fnBody += "' + " + ("obj." + escapeStr).replace(_htmlReg, _escapeHtml.escaping) + " + '";
+                    }
+
+                    //  更新下一次截取字符串的偏移地址
+                    index = offset + match.length;
+                });
+                fnBody += "';return _temp;";
+
+                //  塞到缓存
+                _cache[str] = fnBody;
+            } else {
+                fnBody = _cache[str];
             }
+            return fnBody;
         },
 
-        "get": function(selector) {
-            var el = doc.querySelector(selector),
-                tagName = el === null ? el.tagName.toLower
-                ,str;
-        },
-
-        "compile": function(str) {
-
+        render: function(fnBody, data) {
+            return new Function("obj", fnBody)(data);
         }
-
     };
 
-    //  get Object Prottype Class name
+    //  get protype class on
     function _typeOf(obj) {
-        return _type2.toString.call(obj).slice(8, -1);
+        return {}.toString.call(obj).slice(8, -1);
     }
 
     return Template;
