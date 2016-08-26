@@ -12,9 +12,7 @@ HTML转义输出 | <$ item.html $> | 将HTML中的特殊字符转义后并且输
 
 #### API
 
-- web端:
-
-
+web端:
 
 	<script id="template" type="javascript/template">
 		<ul>
@@ -28,7 +26,7 @@ HTML转义输出 | <$ item.html $> | 将HTML中的特殊字符转义后并且输
         window.onload = function() {
            var tpl = document.querySelector("#template").innerHTML;
            var compileRes = Template.compile(tpl);
-           var data = [
+           var items = [
                     {
                         "text": "list1"
                     },
