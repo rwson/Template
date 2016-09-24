@@ -46,7 +46,7 @@ web端:
     <script type="text/javascript" src="src/Template.js"></script>
     <script type="text/javascript">
         window.onload = function() {
-           var tpl = "<% for(var i = 0, len = data.length; i < len i ++) %><li><%= data[i].text %></li><% } %>";
+           var tpl = "<% for(var i = 0, len = obj.length; i < len i ++) %><li><%= obj[i].text %></li><% } %>";
            var compileRes = Template.compile(tpl);
            var data = [
                     {
@@ -62,4 +62,6 @@ web端:
            document.querySelector(...).innerHTML = Template.render(compiled, data);
         };
     </script>
+    
+大多数模板引擎中是模板编译方法中使用with语句动态修改其内部的this指向，本模板的compile中没有采用这种做法，而是在指定了一个默认参数obj，因此，在编写模板语句时，对数据的读操作务必采用obj.xxx或者obj['xxx']这种形式，防止在运行时报“xxx is not defined”的异常
     
