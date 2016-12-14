@@ -87,7 +87,7 @@
             var fnBody = "";
             var index = 0;
             if (!_cache[str]) {
-                fnBody = "'use strict';var _temp = '';_temp += '";
+                fnBody = "var _temp = '';_temp += '";
                 str.replace(_matcher, function(match, value, evaluate, escapeStr, offset) {
                     fnBody += str.slice(index, offset).replace(_charReg, _escapeCharater.escaping);
 
@@ -120,6 +120,8 @@
         },
 
         render: function(fnBody, data) {
+            console.log(fnBody);
+            console.log(fnBody);
             return new Function("obj", fnBody)(data);
         }
     };
