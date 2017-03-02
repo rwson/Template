@@ -120,8 +120,6 @@
         },
 
         render: function(fnBody, data) {
-            console.log(fnBody);
-            console.log(fnBody);
             return new Function("obj", fnBody)(data);
         }
     };
